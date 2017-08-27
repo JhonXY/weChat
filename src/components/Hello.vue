@@ -1,53 +1,71 @@
 <template>
   <div class="hello">
-    <h1>{{ msg }}</h1>
-    <h2>Essential Links</h2>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank">Forum</a></li>
-      <li><a href="https://gitter.im/vuejs/vue" target="_blank">Gitter Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank">Twitter</a></li>
-      <br>
-      <li><a href="http://vuejs-templates.github.io/webpack/" target="_blank">Docs for This Template</a></li>
-    </ul>
-    <h2>Ecosystem</h2>
-    <ul>
-      <li><a href="http://router.vuejs.org/" target="_blank">vue-router</a></li>
-      <li><a href="http://vuex.vuejs.org/" target="_blank">vuex</a></li>
-      <li><a href="http://vue-loader.vuejs.org/" target="_blank">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank">awesome-vue</a></li>
-    </ul>
+    <article class="block post wysiwyg" v-for="item in msg">
+      <h2>{{item.title}}</h2>
+      <p class="article-meta">发布于 {{item.createDate}}</p>
+      <div class="ui ribbon label red">
+        <a href="">{{item.tag}}</a>
+      </div>
+      <div class="abstract" v-html="item.content.html">
+      </div>
+    </article>
   </div>
 </template>
 
 <script>
+import axios from 'axios'
 export default {
   name: 'hello',
   data () {
     return {
-      msg: 'Welcome to Your Vue.js App'
+      msg: [],
+      page: 1,
+      pageSize: 10,
+      count: 0
     }
+  },
+  mounted () {
+    this.init()
+  },
+  methods: {
+    init () {
+      let $http = {
+        get (url) {
+          let promise = new Promise ((resolve, reject)=>{
+            let param = {
+              page: this.page,
+              pageSize: this.pageSize
+            }
+            axios.get(url, {
+              params: param
+            }).then((result)=>{
+              let res = result.data
+              if (res.status == "0") {
+                if (res.result.count == 0) {
+                  this.page -= 1
+                  return
+                } else {
+                  resolve(res.result.list)
+                }
+              } else {
+                reject(res.status)
+              }
+            })
+          })
+          return promise
+        }
+      }
+
+      $http.get('/api/articleList').then((res)=>{
+            this.msg = res;
+        }, (err)=>{
+            document.write(err);
+        })
+      }
   }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h1, h2 {
-  font-weight: normal;
-}
-
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-
-a {
-  color: #42b983;
-}
 </style>

@@ -1,6 +1,6 @@
-# wechat
+# ES6
 
-> wechat official acount
+> ES6 practice
 
 ## Build Setup
 
